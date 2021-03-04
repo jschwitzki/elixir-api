@@ -1,0 +1,38 @@
+defmodule Rocketpay.Users.CreateTest do
+  use Rocketpay.DataCase, async: true
+  alias Rocketpay.User
+  alias Rocketpay.Users.Create
+
+  describe "call/1" do
+    test "When all params are valid, returns an user" do
+      params = %{
+        name: "e1",
+        password: "123456",
+        nickname: "e1",
+        email: "e1@test.com",
+        age: 21
+      }
+      {:ok, %User{id: user_id}} = Create.call(params)
+      user = Repo.get(User, user_id)
+
+      assert %User{name: "e1", age: 21, id: ^user_id} = user
+    end
+  end
+
+  test "When there are invalid params, returns an user" do
+    params = %{
+      name: "e1",
+      nickname: "e1",
+      email: "e1@test.com",
+      age: 15
+    }
+    {:error, changeset} = Create.call(params)
+
+    expected_response = %{
+      age: ["must be greater than or equal to 18"],
+      password: ["can't be blank"]
+    }
+
+    assert errors_on(changeset) == expected_response
+  end
+end
